@@ -1750,20 +1750,22 @@ ControllerSpop.prototype.getAlbumTracks = function (id) {
                     var albumart = results.body.images[0].url;
                     for (var i in results.body.tracks.items) {
                         var track = results.body.tracks.items[i];
-                        response.push({
-                            service: 'spop',
-                            type: 'song',
-                            title: track.name,
-                            name: track.name,
-                            artist: track.artists[0].name,
-                            album: album,
-                            albumart: albumart,
-                            uri: track.uri,
-                            samplerate: self.samplerate,
-                            bitdepth: '16 bit',
-                            trackType: 'spotify',
-                            duration: Math.trunc(track.duration_ms / 1000)
-                        });
+                        if (track.restrictions == undefined){
+                            response.push({
+                                service: 'spop',
+                                type: 'song',
+                                title: track.name,
+                                name: track.name,
+                                artist: track.artists[0].name,
+                                album: album,
+                                albumart: albumart,
+                                uri: track.uri,
+                                samplerate: self.samplerate,
+                                bitdepth: '16 bit',
+                                trackType: 'spotify',
+                                duration: Math.trunc(track.duration_ms / 1000)
+                            });
+                        }
                     }
                     defer.resolve(response);
                 }, function (err) {
@@ -1788,23 +1790,25 @@ ControllerSpop.prototype.getPlaylistTracks = function (userId, playlistId) {
 
                 for (var i in results.body.tracks.items) {
                     var track = results.body.tracks.items[i].track;
-                    try {
-                        var item = {
-                            service: 'spop',
-                            type: 'song',
-                            name: track.name,
-                            title: track.name,
-                            artist: track.artists[0].name,
-                            album: track.album.name,
-                            uri: track.uri,
-                            samplerate: self.samplerate,
-                            bitdepth: '16 bit',
-                            trackType: 'spotify',
-                            albumart: (track.album.hasOwnProperty('images') && track.album.images.length > 0 ? track.album.images[0].url : ''),
-                            duration: Math.trunc(track.duration_ms / 1000)
-                        };
-                        response.push(item);
-                    } catch(e) {}
+                    if (track.restrictions == undefined){
+                        try {
+                            var item = {
+                                service: 'spop',
+                                type: 'song',
+                                name: track.name,
+                                title: track.name,
+                                artist: track.artists[0].name,
+                                album: track.album.name,
+                                uri: track.uri,
+                                samplerate: self.samplerate,
+                                bitdepth: '16 bit',
+                                trackType: 'spotify',
+                                albumart: (track.album.hasOwnProperty('images') && track.album.images.length > 0 ? track.album.images[0].url : ''),
+                                duration: Math.trunc(track.duration_ms / 1000)
+                            };
+                            response.push(item);
+                        } catch(e) {}
+                    }
                 }
                 defer.resolve(response);
             }, function (err) {
@@ -1829,23 +1833,25 @@ ControllerSpop.prototype.getArtistTopTracks = function (id) {
                 for (var i in results.body.tracks) {
                     var albumart = '';
                     var track = results.body.tracks[i];
-                    if (track.album.hasOwnProperty('images') && track.album.images.length > 0) {
-                        albumart = track.album.images[0].url;
+                    if (track.restrictions == undefined){
+                        if (track.album.hasOwnProperty('images') && track.album.images.length > 0) {
+                            albumart = track.album.images[0].url;
+                        }
+                        response.push({
+                            service: 'spop',
+                            type: 'song',
+                            name: track.name,
+                            title: track.name,
+                            artist: track.artists[0].name,
+                            album: track.album.name,
+                            albumart: albumart,
+                            duration: parseInt(track.duration_ms / 1000),
+                            samplerate: self.samplerate,
+                            bitdepth: '16 bit',
+                            trackType: 'spotify',
+                            uri: track.uri
+                        });
                     }
-                    response.push({
-                        service: 'spop',
-                        type: 'song',
-                        name: track.name,
-                        title: track.name,
-                        artist: track.artists[0].name,
-                        album: track.album.name,
-                        albumart: albumart,
-                        duration: parseInt(track.duration_ms / 1000),
-                        samplerate: self.samplerate,
-                        bitdepth: '16 bit',
-                        trackType: 'spotify',
-                        uri: track.uri
-                    });
                 }
                 defer.resolve(response);
             }), function (err) {
